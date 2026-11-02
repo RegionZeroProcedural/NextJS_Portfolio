@@ -4966,3 +4966,23 @@ body,
   .hero-actions { margin-top: 16px; }
   .hero-location { margin-top: 16px; }
 }
+
+@media (max-width: 768.99px) {
+  .hero-description,
+  .section-description,
+  .project-description,
+  .experiment-description,
+  .project-detail-copy p,
+  .skill-description,
+  .experience-item p,
+  .experience-points,
+  .other-employment p,
+  .about-copy > p,
+  .developer-notes p,
+  .contact-copy > p:last-child,
+  .contact-note,
+  .credential-description {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
