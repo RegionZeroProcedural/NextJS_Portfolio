@@ -160,24 +160,35 @@
   }
 }
 
-/* A highlight-only backdrop bloom keeps bright accents atmospheric without
-   softening page copy. The static gradient is a lightweight fallback. */
+/* Apply thresholded highlight bloom to the whole visible page where supported.
+   The restrained accent glow remains as a fallback for browsers without SVG
+   backdrop filters. */
 body::after {
   position: fixed;
   z-index: 19;
   inset: 0;
   pointer-events: none;
   content: "";
-  opacity: .2;
+  opacity: .06;
   background:
-    radial-gradient(ellipse 34rem 24rem at 17% 23%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 72%),
-    radial-gradient(ellipse 30rem 24rem at 82% 65%, color-mix(in srgb, var(--accent-secondary) 14%, transparent), transparent 74%),
-    radial-gradient(ellipse 25rem 18rem at 56% 47%, rgb(255 255 255 / 5%), transparent 75%);
+    radial-gradient(ellipse 48rem 36rem at 17% 23%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%),
+    radial-gradient(ellipse 44rem 34rem at 82% 65%, color-mix(in srgb, var(--accent-secondary) 11%, transparent), transparent 74%),
+    radial-gradient(ellipse 36rem 28rem at 56% 47%, rgb(255 255 255 / 4%), transparent 75%);
   mix-blend-mode: screen;
+}
+@supports (backdrop-filter: url(#page-bloom)) {
+  body::after {
+    opacity: 1;
+    background: transparent;
+    -webkit-backdrop-filter: url(#page-bloom);
+    backdrop-filter: url(#page-bloom);
+  }
 }
 @media (prefers-reduced-transparency: reduce) {
   body::after {
-    opacity: .08;
+    opacity: .04;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 

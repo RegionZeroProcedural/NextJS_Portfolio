@@ -9,8 +9,7 @@ import { SHADER_STATUS_EVENT, type ShaderStatus } from "@/lib/openglassui/shader
  * pieces become smaller as the visitor explores the page. They float via
  * persistent compositor-only CSS transforms; none creates WebGL contexts.
  * Refraction is enabled only after the live shader's first successful frame.
- * The observer limits live DOM-backdrop displacement to visible pieces.
- * It never gates animation: all ten elements float continuously.
+ * The observer tracks visibility only; it never gates animation or refraction.
  */
 export function AmbientGlass() {
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -18,42 +17,29 @@ export function AmbientGlass() {
     const root = fieldRef.current;
     if (!root) return;
     const pieces = Array.from(root.querySelectorAll<HTMLElement>(".ambient-glass-object"));
-    const intersecting = new Set<HTMLElement>();
     let opticsReady = document.documentElement.classList.contains("glass-optics-live");
 
-    // Each active moving backdrop filter has a compositing cost. Upgrade the
-    // visible pieces progressively, with a hard cap of three (one on touch).
-    // Every piece receives the same treatment when it scrolls into view.
     const refreshOptics = () => {
-      const limit = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches ? 1 : 3;
-      let assigned = 0;
       for (const piece of pieces) {
-        const active = opticsReady && intersecting.has(piece) && assigned < limit;
-        piece.classList.toggle("optical-active", active);
-        if (active) assigned += 1;
+        piece.classList.toggle("optical-active", opticsReady);
       }
     };
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         const piece = entry.target as HTMLElement;
-        if (entry.isIntersecting) intersecting.add(piece);
-        else intersecting.delete(piece);
         piece.classList.toggle("is-visible", entry.isIntersecting);
       }
-      refreshOptics();
     }, { rootMargin: "75px 0px", threshold: 0.01 });
     pieces.forEach((piece) => observer.observe(piece));
+    refreshOptics();
     const onShaderStatus = (event: Event) => {
       opticsReady = (event as CustomEvent<ShaderStatus>).detail.phase === "ready";
       refreshOptics();
     };
-    const onViewportChanged = () => refreshOptics();
     window.addEventListener(SHADER_STATUS_EVENT, onShaderStatus);
-    window.addEventListener("resize", onViewportChanged, { passive: true });
     return () => {
       observer.disconnect();
       window.removeEventListener(SHADER_STATUS_EVENT, onShaderStatus);
-      window.removeEventListener("resize", onViewportChanged);
       pieces.forEach((piece) => piece.classList.remove("optical-active"));
     };
   }, []);

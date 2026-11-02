@@ -3441,10 +3441,10 @@ body { position: relative; }
    The GPU lens in GlassStage remains completely untouched. After its FIRST
    successful frame, shaderStatus toggles .glass-optics-live on <html>.
    CSS/SVG backdrop displacement then refracts the *actual DOM backdrop* of
-   selected buttons and visible floating panels. This is separate from GLSL:
+   selected buttons and all floating panels. This is separate from GLSL:
    sampling DOM directly in GLSL would require an expensive DOM capture pass.
-   Idle: no moving backdrop filters. Live: <=2 visible moving filters, <=1
-   on touch. No new WebGL contexts, readbacks, canvases or textures.
+   Idle: no moving backdrop filters. Live: every floating panel refracts.
+   No new WebGL contexts, readbacks, canvases or textures.
    ============================================================================ */
 
 /* Bring floating glass IN FRONT of the page only in live mode. Otherwise it
@@ -3559,8 +3559,8 @@ body { position: relative; }
   }
 }
 
-/* Touch devices: at most one backdrop-active floating piece (observer), plus
-   buttons. No hover-only tag filters or aggressive blur on scrolling grids. */
+/* Keep touch-device refraction subtle and drift restrained. No hover-only tag
+   filters or aggressive blur on scrolling grids. */
 @media (max-width: 760px), (pointer: coarse) {
   :root.glass-optics-live .ambient-glass-object.optical-active .refractive-surface {
     -webkit-backdrop-filter: blur(.7px) saturate(113%);
@@ -3577,6 +3577,25 @@ body { position: relative; }
   :root .ambient-glass-field .ambient-glass-object.is-visible {
     animation: none !important;
     transform: none !important;
+  }
+}
+
+@media (max-width: 901px) {
+  .site-header {
+    transition: transform 240ms cubic-bezier(.2, .75, .25, 1), visibility 0s;
+  }
+  .site-header.is-scroll-hidden {
+    transform: translateY(-100%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 200ms cubic-bezier(.4, 0, .8, .3), visibility 0s linear 200ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header.is-scroll-hidden {
+    transition: none;
   }
 }
 
@@ -4496,9 +4515,24 @@ body { position: relative; }
   .mail-modal-optic-surface { background: none; }
 }
 
-@media (max-width: 901px) {
+@media (max-width: 902px) {
   :root.glass-optics-live .ambient-glass-field {
-    z-index: 0;
+    z-index: 3;
+  }
+
+  .ambient-object-metrics { right: clamp(-185px, -46vw, -145px); }
+  .ambient-object-inspector { left: clamp(-155px, -40vw, -125px); }
+  .ambient-object-toolbar { right: clamp(-160px, -40vw, -145px); }
+  .ambient-object-activity { left: clamp(-125px, -30vw, -95px); }
+  .ambient-object-flow { right: clamp(-125px, -35vw, -90px); }
+  .ambient-object-compile { left: clamp(-110px, -25vw, -80px); }
+  .ambient-object-stack { right: clamp(-100px, -25vw, -70px); }
+  .ambient-object-packet { left: clamp(-80px, -18vw, -55px); }
+  .ambient-object-token { right: clamp(-75px, -18vw, -55px); }
+  .ambient-object-dot { left: clamp(-60px, -14vw, -42px); }
+
+  :root.glass-optics-live .ambient-glass-object.optical-active .refractive-content {
+    opacity: .55;
   }
 
   [data-aos="fade-left"],
@@ -4510,17 +4544,6 @@ body { position: relative; }
   [data-aos="fade-right"].aos-animate {
     transform: translate3d(0, 0, 0) !important;
   }
-
-  .ambient-object-metrics,
-  .ambient-object-toolbar,
-  .ambient-object-flow,
-  .ambient-object-stack,
-  .ambient-object-token { right: clamp(0px, 1vw, 12px); }
-  .ambient-object-inspector,
-  .ambient-object-activity,
-  .ambient-object-compile,
-  .ambient-object-packet,
-  .ambient-object-dot { left: clamp(0px, 1vw, 12px); }
 
   .ambient-glass-field .ambient-glass-object,
   .ambient-glass-field .ambient-glass-object.is-visible {
@@ -4556,18 +4579,6 @@ body { position: relative; }
 }
 
 @media (max-width: 441px) {
-  .ambient-object-metrics,
-  .ambient-object-toolbar,
-  .ambient-object-flow,
-  .ambient-object-stack,
-  .ambient-object-token { right: clamp(0px, 5vw, 24px); }
-
-  .ambient-object-inspector,
-  .ambient-object-activity,
-  .ambient-object-compile,
-  .ambient-object-packet,
-  .ambient-object-dot { left: clamp(0px, 4vw, 18px); }
-
   .ambient-object-metrics { width: min(232px, 72vw); }
   .ambient-object-inspector { width: min(201px, 65vw); }
   .ambient-object-toolbar { width: min(210px, 68vw); }
@@ -4931,4 +4942,27 @@ body,
   .experiment-card,
   .skill-tab,
   .timeline-dot { transition: none; }
+}
+
+@media (max-width: 768.99px) and (max-height: 850px) {
+  .hero {
+    gap: 24px;
+    padding-top: 38px;
+    padding-bottom: 54px;
+  }
+
+  .availability { margin-bottom: 18px; }
+  .hero-kicker { margin-bottom: 9px; }
+  .hero h1 { font-size: clamp(70px, 16vw, 98px); }
+  .hero-tagline {
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-size: clamp(20px, 5vw, 24px);
+  }
+  .hero-description {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .hero-actions { margin-top: 16px; }
+  .hero-location { margin-top: 16px; }
 }

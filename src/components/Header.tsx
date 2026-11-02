@@ -17,7 +17,9 @@ const navigation = [
 export function Header() {
   const [activeSection, setActiveSection] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [shaderStatus, setShaderStatus] = useState<ShaderStatus>({ phase: "idle", label: "ON DEMAND" });
+  const headerRef = useRef<HTMLElement>(null);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -53,6 +55,46 @@ export function Header() {
   }, [menuOpen]);
 
   useEffect(() => {
+    const mobileLayout = window.matchMedia("(max-width: 901px)");
+    let previousY = window.scrollY;
+    let accumulatedDelta = 0;
+    let direction = 0;
+
+    const updateHeaderVisibility = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - previousY;
+      previousY = currentY;
+      const activeElement = document.activeElement;
+      const headerHasVisibleFocus = activeElement instanceof HTMLElement
+        && activeElement.matches(":focus-visible")
+        && headerRef.current?.contains(activeElement);
+
+      if (!mobileLayout.matches || currentY <= 80 || menuOpen || headerHasVisibleFocus) {
+        accumulatedDelta = 0;
+        direction = 0;
+        setHeaderHidden(false);
+        return;
+      }
+
+      const nextDirection = Math.sign(delta);
+      if (nextDirection && nextDirection !== direction) accumulatedDelta = 0;
+      if (nextDirection) direction = nextDirection;
+      accumulatedDelta += delta;
+
+      if (accumulatedDelta > 8) setHeaderHidden(true);
+      else if (accumulatedDelta < -8) setHeaderHidden(false);
+    };
+
+    window.addEventListener("scroll", updateHeaderVisibility, { passive: true });
+    mobileLayout.addEventListener("change", updateHeaderVisibility);
+    updateHeaderVisibility();
+    return () => {
+      window.removeEventListener("scroll", updateHeaderVisibility);
+      mobileLayout.removeEventListener("change", updateHeaderVisibility);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
     const update = (event: Event) => {
       setShaderStatus((event as CustomEvent<ShaderStatus>).detail);
     };
@@ -62,7 +104,7 @@ export function Header() {
 
   const loadingShader = ["queued", "creating", "compiling", "linking"].includes(shaderStatus.phase);
   return (
-    <header className="site-header">
+    <header ref={headerRef} className={`site-header${headerHidden && !menuOpen ? " is-scroll-hidden" : ""}`}>
       <div className="header-shader-status" role="status" aria-live="polite">
         <span className="header-shader-label mono">{loadingShader ? "LOADING SHADER" : "SHADER"} <b>{shaderStatus.label}</b></span>
         <span className={`header-shader-track${loadingShader ? " is-loading" : ""}${shaderStatus.phase === "ready" ? " is-ready" : ""}`} aria-hidden="true">
