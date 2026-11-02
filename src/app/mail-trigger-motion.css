@@ -1,0 +1,158 @@
+/* V19 — mail button motion. Last CSS import in layout.tsx.
+   This deliberately targets one component; live optics, floating objects,
+   both themes, AOS and the contact form remain unchanged. */
+.mail-dock-trigger.mail-dock-motion {
+  transform: translate3d(0,0,0) scale(1);
+  transform-origin: center center;
+  transition: transform 380ms cubic-bezier(.17, .89, .25, 1.22),
+              box-shadow 320ms ease, border-color 320ms ease;
+}
+.mail-dock-motion__glow {
+  position: absolute;
+  inset: 4px;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: .45;
+  background: radial-gradient(circle at 32% 21%, rgba(188,236,255,.37), transparent 60%);
+  transition: opacity 300ms ease, transform 420ms ease;
+}
+.mail-dock-motion__ripple {
+  position: absolute;
+  inset: 7px;
+  z-index: 1;
+  border: 2px solid rgba(221,250,255,.92);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(.4);
+}
+.mail-dock-trigger.mail-dock-motion::after {
+  content: "";
+  position: absolute;
+  inset: -55%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.08) 41%, rgba(245,254,255,.57) 50%, rgba(174,229,255,.11) 59%, transparent 70%);
+  transform: translate3d(-60%,10%,0) rotate(15deg);
+}
+.mail-dock-trigger.mail-dock-motion .mail-dock-icon {
+  position: relative;
+  z-index: 2;
+  transition: transform 410ms cubic-bezier(.19,.87,.25,1.25);
+  transform: translate3d(0,0,0) rotate(0deg) scale(1);
+}
+.mail-dock-trigger.mail-dock-motion .mail-dock-glint { z-index: 2; }
+@media (hover:hover) and (pointer:fine) {
+  .mail-dock-trigger.mail-dock-motion:not(.mail-dock-motion--launch):hover {
+    transform: translate3d(0,-10px,0) scale(1.12);
+    border-color: rgba(246,254,255,.98);
+    box-shadow: inset 0 3px 3px rgba(250,255,255,.56),
+      inset 0 -7px 12px rgba(1,13,32,.6),
+      0 4px 0 rgba(7,25,49,.6),
+      0 22px 45px rgba(0,12,28,.56),
+      0 0 0 8px rgba(124,204,255,.17),
+      0 0 34px rgba(95,195,255,.22);
+  }
+  .mail-dock-trigger.mail-dock-motion:hover .mail-dock-icon {
+    transform: translate3d(0,-3px,0) rotate(-14deg) scale(1.18);
+  }
+  .mail-dock-trigger.mail-dock-motion:hover .mail-dock-motion__glow {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  .mail-dock-trigger.mail-dock-motion:hover::after {
+    animation: mail-v19-shine .8s ease-out both;
+  }
+}
+.mail-dock-trigger.mail-dock-motion:active:not(.mail-dock-motion--launch) {
+  transform: translate3d(0,3px,0) scale(.82);
+  transition-duration: 90ms;
+}
+.mail-dock-trigger.mail-dock-motion--launch {
+  animation: mail-v19-press 440ms cubic-bezier(.2,.82,.3,1) both;
+}
+.mail-dock-trigger.mail-dock-motion--launch .mail-dock-icon {
+  animation: mail-v19-envelope 440ms cubic-bezier(.2,.82,.3,1) both;
+}
+.mail-dock-trigger.mail-dock-motion--launch .mail-dock-motion__ripple {
+  animation: mail-v19-ripple 440ms ease-out both;
+}
+.mail-dock-trigger.mail-dock-motion--launch::after {
+  animation: mail-v19-shine .44s ease-out both;
+}
+@keyframes mail-v19-press {
+  0% { transform: translate3d(0,-8px,0) scale(1.1); }
+  28% { transform: translate3d(0,4px,0) scale(.78); }
+  67% { transform: translate3d(0,-7px,0) scale(1.17); }
+  100% { transform: translate3d(0,-2px,0) scale(1.04); }
+}
+@keyframes mail-v19-envelope {
+  0% { transform: translate3d(0,-2px,0) rotate(-8deg) scale(1.1); }
+  30% { transform: translate3d(0,2px,0) rotate(8deg) scale(.9); }
+  75% { transform: translate3d(0,-5px,0) rotate(-16deg) scale(1.23); }
+  100% { transform: translate3d(0,-2px,0) rotate(0) scale(1); }
+}
+@keyframes mail-v19-ripple {
+  0% { opacity:.9; transform:scale(.4); }
+  50% {opacity:.72}
+  100% {opacity:0;transform:scale(1.3)}
+}
+@keyframes mail-v19-shine {
+  0% {opacity:0;transform:translate3d(-60%,10%,0) rotate(15deg)}
+  25% {opacity:1}
+  100% {opacity:0;transform:translate3d(60%,-10%,0) rotate(15deg)}
+}
+/* Only animate the modal's transform; opacity on its backdrop would break refraction. */
+.mail-modal { animation: mail-v19-dialog 370ms cubic-bezier(.19,.87,.25,1.08) both; }
+@keyframes mail-v19-dialog {
+  from { transform: translate3d(0,23px,0) scale(.96); }
+  to { transform: translate3d(0,0,0) scale(1); }
+}
+:root[data-theme="light"] .mail-dock-trigger.mail-dock-motion:hover { border-color:#9bdaf9; }
+@media (prefers-reduced-motion:reduce) {
+  .mail-dock-trigger.mail-dock-motion,
+  .mail-dock-trigger.mail-dock-motion .mail-dock-icon,
+  .mail-dock-motion__glow { transition: none !important; }
+  .mail-dock-trigger.mail-dock-motion,
+  .mail-dock-trigger.mail-dock-motion:hover,
+  .mail-dock-trigger.mail-dock-motion:active,
+  .mail-dock-trigger.mail-dock-motion--launch,
+  .mail-dock-trigger.mail-dock-motion .mail-dock-icon { animation:none!important; transform:none!important; }
+  .mail-dock-motion__ripple,
+  .mail-dock-trigger.mail-dock-motion::after,
+  .mail-modal { animation:none!important; }
+}
+
+/* V20 — the trigger disappears only after the 440ms click sequence opens
+   the modal. When the modal closes, it fades back into place. */
+.mail-dock-trigger.mail-dock-motion {
+  visibility: visible;
+  opacity: 1;
+  transition:
+    transform 380ms cubic-bezier(.17, .89, .25, 1.22),
+    opacity 220ms ease,
+    visibility 0s,
+    box-shadow 320ms ease,
+    border-color 320ms ease;
+}
+.mail-dock-trigger.mail-dock-motion.mail-dock-motion--hidden,
+.mail-dock-trigger.mail-dock-motion.mail-dock-motion--hidden:hover {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(.75);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 0s linear 220ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mail-dock-trigger.mail-dock-motion.mail-dock-motion--hidden,
+  .mail-dock-trigger.mail-dock-motion.mail-dock-motion--hidden:hover {
+    opacity: 0 !important;
+    visibility: hidden;
+    transition: none !important;
+  }
+}
