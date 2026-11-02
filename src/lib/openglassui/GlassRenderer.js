@@ -122,9 +122,9 @@ export class GlassRenderer {
   /**
    * Non-blocking, explicitly opted-in shader setup. Uses the WebGL
    * KHR_parallel_shader_compile completion fence rather than calling a
-   * synchronous compile-status getter on an unfinished shader. When the
-   * extension is missing, we leave the CSS preview active instead of
-   * risking a multi-second main-thread driver stall.
+   * synchronous compile-status getter on an unfinished shader. Some mobile
+   * browsers omit the extension, so compile shaders one at a time with
+   * browser yields as a compatibility path.
    */
   static async createNonBlocking(canvas, onStage = () => {}, signal) {
     const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 32));
@@ -140,7 +140,6 @@ export class GlassRenderer {
     });
     if (!gl) throw new Error('WebGL2 is unavailable on this device.');
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
-    if (!parallel) throw new Error('This GPU cannot compile shaders in parallel. Using the lightweight preview to avoid freezing.');
     let vertex = null, fragment = null, program = null;
     try {
       failIfCanceled();
@@ -153,21 +152,32 @@ export class GlassRenderer {
       gl.compileShader(vertex);
       await yieldToBrowser();
       failIfCanceled();
+      if (!parallel && !gl.getShaderParameter(vertex, gl.COMPILE_STATUS)) {
+        throw new Error(`OpenGlassUI vertex shader failed: ${gl.getShaderInfoLog(vertex)}`);
+      }
       gl.shaderSource(fragment, fragmentShader);
       gl.compileShader(fragment);
       await yieldToBrowser();
       failIfCanceled();
+      if (!parallel && !gl.getShaderParameter(fragment, gl.COMPILE_STATUS)) {
+        throw new Error(`OpenGlassUI fragment shader failed: ${gl.getShaderInfoLog(fragment)}`);
+      }
       onStage('linking');
       program = gl.createProgram();
       if (!program) throw new Error('Unable to allocate shader program.');
       gl.attachShader(program, vertex);
       gl.attachShader(program, fragment);
       gl.linkProgram(program);
-      const started = performance.now();
-      while (!gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) {
-        failIfCanceled();
-        if (performance.now() - started > 12000) throw new Error('Shader compile timed out. Staying in lightweight mode.');
+      if (parallel) {
+        const started = performance.now();
+        while (!gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) {
+          failIfCanceled();
+          if (performance.now() - started > 12000) throw new Error('Shader compile timed out. Staying in lightweight mode.');
+          await yieldToBrowser();
+        }
+      } else {
         await yieldToBrowser();
+        failIfCanceled();
       }
       failIfCanceled();
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {

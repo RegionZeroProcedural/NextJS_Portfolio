@@ -42,15 +42,6 @@ export function BackdropOptics() {
           <feGaussianBlur in="modal-field" stdDeviation="4" result="modal-normal" />
           <feDisplacementMap in="SourceGraphic" in2="modal-normal" scale="11" xChannelSelector="R" yChannelSelector="G" />
         </filter>
-        <filter id="page-bloom" x="-8%" y="-8%" width="116%" height="116%" colorInterpolationFilters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="bloom-soft" />
-          <feComponentTransfer in="bloom-soft">
-            <feFuncR type="linear" slope="1.45" intercept="-0.42" />
-            <feFuncG type="linear" slope="1.45" intercept="-0.42" />
-            <feFuncB type="linear" slope="1.45" intercept="-0.42" />
-            <feFuncA type="linear" slope="0.32" />
-          </feComponentTransfer>
-        </filter>
       </defs>
     </svg>
   );

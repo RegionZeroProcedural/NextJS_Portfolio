@@ -168,25 +168,16 @@ body::after {
   inset: 0;
   pointer-events: none;
   content: "";
-  opacity: .09;
+  opacity: .2;
   background:
-    radial-gradient(ellipse 38rem 28rem at 18% 24%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 76%),
-    radial-gradient(ellipse 32rem 24rem at 82% 66%, color-mix(in srgb, var(--accent-secondary) 10%, transparent), transparent 78%);
+    radial-gradient(ellipse 34rem 24rem at 17% 23%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 72%),
+    radial-gradient(ellipse 30rem 24rem at 82% 65%, color-mix(in srgb, var(--accent-secondary) 14%, transparent), transparent 74%),
+    radial-gradient(ellipse 25rem 18rem at 56% 47%, rgb(255 255 255 / 5%), transparent 75%);
   mix-blend-mode: screen;
-}
-@supports (backdrop-filter: url(#page-bloom)) {
-  body::after {
-    opacity: .72;
-    background: transparent;
-    mix-blend-mode: screen;
-    -webkit-backdrop-filter: url(#page-bloom);
-    backdrop-filter: url(#page-bloom);
-  }
 }
 @media (prefers-reduced-transparency: reduce) {
   body::after {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    opacity: .08;
   }
 }
 
