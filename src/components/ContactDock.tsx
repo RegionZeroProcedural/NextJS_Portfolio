@@ -67,6 +67,7 @@ export function ContactDock() {
   const nameRef = useRef<HTMLInputElement>(null);
   const lastSentRef = useRef(0);
   const triggerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const launchTimer = useRef<number | null>(null);
 
   useEffect(() => () => {
     if (triggerTimerRef.current !== null) clearTimeout(triggerTimerRef.current);
@@ -135,7 +136,9 @@ export function ContactDock() {
       return;
     }
     setTriggerLaunching(true);
-    triggerTimerRef.current = window.setTimeout(showDialog, 440);
+    launchTimer.current = window.setTimeout(() => {
+      showDialog();
+    }, 440);
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
