@@ -55,9 +55,7 @@ export default function Home() {
     <>
       <BackdropOptics />
       <AmbientGlass />
-      <div data-aos="fade-down" className="project-aos-wrapper">
-        <Header />
-      </div>
+      <Header />
       <main>
         <section className="hero page-width" id="home" aria-labelledby="hero-title">
           <div className="hero-copy">

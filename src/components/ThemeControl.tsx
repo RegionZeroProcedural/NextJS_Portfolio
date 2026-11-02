@@ -3,9 +3,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 const accents = [
-  { name: "Ice blue", value: "#68c9ff" },
-  { name: "Violet", value: "#b19aff" },
-  { name: "Mint", value: "#57e6ba" },
+  { name: "Ice blue", value: "#68c9ff", secondary: "#9b7cff" },
+  { name: "Violet", value: "#b19aff", secondary: "#68c9ff" },
+  { name: "Mint", value: "#57e6ba", secondary: "#68c9ff" },
 ];
 
 const defaultAccent = accents[0];
@@ -36,7 +36,8 @@ export function ThemeControl({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", selected.value);
-  }, [selected.value]);
+    document.documentElement.style.setProperty("--accent-secondary", selected.secondary);
+  }, [selected.value, selected.secondary]);
 
   function chooseAccent(accent: (typeof accents)[number]) {
     window.localStorage.setItem("portfolio-accent", accent.value);

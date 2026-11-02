@@ -4,6 +4,22 @@ import { useEffect, useState } from "react";
 
 type ColorMode = "dark" | "light";
 const STORAGE_KEY = "portfolio-color-mode";
+type ViewTransitionDocument = Document & {
+  startViewTransition?: (update: () => void) => void;
+};
+
+function updateColorMode(next: ColorMode, updateMode: (mode: ColorMode) => void) {
+  const update = () => {
+    document.documentElement.dataset.theme = next;
+    updateMode(next);
+  };
+  const transitionDocument = document as ViewTransitionDocument;
+  if (typeof transitionDocument.startViewTransition === "function") {
+    transitionDocument.startViewTransition(update);
+  } else {
+    update();
+  }
+}
 
 /** Appearance is independent of the accent-color picker and OpenGlassUI Live. */
 export function ColorModeToggle() {
@@ -20,8 +36,7 @@ export function ColorModeToggle() {
     const onStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;
       const next = event.newValue === "light" ? "light" : "dark";
-      document.documentElement.dataset.theme = next;
-      setMode(next);
+      updateColorMode(next, setMode);
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
@@ -29,8 +44,7 @@ export function ColorModeToggle() {
 
   function toggleColorMode() {
     const next: ColorMode = mode === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    setMode(next);
+    updateColorMode(next, setMode);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
     } catch {

@@ -1,15 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import certificateImage from "@/assets/fes-institute-graduation.png";
 
 /** A compact, accessible certificate preview with a full-resolution dialog. */
 export function CredentialCard() {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [closing, setClosing] = useState(false);
 
-  const openCertificate = () => dialogRef.current?.showModal();
-  const closeCertificate = () => dialogRef.current?.close();
+  const openCertificate = () => {
+    setClosing(false);
+    dialogRef.current?.showModal();
+  };
+  const closeCertificate = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      dialogRef.current?.close();
+      return;
+    }
+    setClosing(true);
+  };
 
   return (
     <>
@@ -49,8 +59,18 @@ export function CredentialCard() {
 
       <dialog
         ref={dialogRef}
-        className="credential-dialog"
+        className={`credential-dialog${closing ? " credential-dialog--closing" : ""}`}
         aria-labelledby="credential-dialog-title"
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.animationName === "mail-v19-dialog-close") {
+            dialogRef.current?.close();
+            setClosing(false);
+          }
+        }}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeCertificate();
+        }}
         onClick={(event) => {
           if (event.target === event.currentTarget) closeCertificate();
         }}
